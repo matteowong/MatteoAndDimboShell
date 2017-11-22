@@ -9,6 +9,7 @@ char * read_buff() {
   char * s=(char *)calloc(256,1);
   fgets(s,256,stdin);
   //printf("%s\n",s);
+  s[strlen(s)-1]=0;//remove new line
   return s;
 }
 
@@ -47,9 +48,14 @@ char** parse_args(char * line) {
 int main() {
 
   char ** args=parse_args(read_buff());
-  int i=0;
-  while (args[i++])
+  /*int i=0;
+  while (args[i]) {
     printf("%d: %s\n",i,args[i]);
+    i++;
+  }
+  printf("%d: %s\n",i,args[i]);
+  printf("%s\n",args[0]);*/
+
   execvp(args[0],args);
   
   return 0;
