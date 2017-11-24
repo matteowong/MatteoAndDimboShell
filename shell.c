@@ -4,6 +4,9 @@
 #include <signal.h>
 #include <string.h>
 
+//read_buff()
+//pre: none
+//post: reads in and returns a string of up to 255 characters from standard in, replaces new line with NULL
 char * read_buff() {
 
   char * s=(char *)calloc(256,1);
@@ -13,6 +16,9 @@ char * read_buff() {
   return s;
 }
 
+//num_tokens
+//pre: takes a string
+//post: returns number of tokens separated by a space in given string
 int num_tokens(char * s){
   //printf("s is %s\n",s);
   int ret=1;
@@ -28,16 +34,19 @@ int num_tokens(char * s){
 
 }
 
+//parse_args
+//pre: takes a string separated by spaces
+//post: returns an array of strings, each index holding one token from the inputted line (each token is separated by a single space in the input line)
 char** parse_args(char * line) {
 
   char ** s=(char **)calloc(sizeof(char *),num_tokens(line)+1);
-  printf("line: %s\n",line);
+  //printf("line: %s\n",line);
   int i=0;
   while (line){
     s[i]=line;
-    printf("line before strsep: %s\n",line);
+    //printf("line before strsep: %s\n",line);
     strsep(&line, " ");
-    printf("line after strsep: %s\n",line);
+    //printf("line after strsep: %s\n",line);
     i++;
   }
   return s;
@@ -47,16 +56,22 @@ char** parse_args(char * line) {
 
 int main() {
 
+  int status;
+  while (1) {
   char ** args=parse_args(read_buff());
-  /*int i=0;
-  while (args[i]) {
-    printf("%d: %s\n",i,args[i]);
-    i++;
+  if (fork()==0) {
+    if (!strcmp(args[0],"exit")) {
+      return 1;
+    }
+    execvp(args[0],args);
   }
-  printf("%d: %s\n",i,args[i]);
-  printf("%s\n",args[0]);*/
+  else {
+    wait(&status);
+    if (WEXITSTATUS(status)==1)//exits
+      return 0;
+  }
 
-  execvp(args[0],args);
+  }
   
   return 0;
 }
