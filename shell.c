@@ -79,11 +79,10 @@ int array_of_str_len(char ** s) {
 }
 
 
-//execute()
+//main()
 //pre: none
-//post: returns an int due to forking
 //splits input from buffer on semicolon, then splits again based on white space, then executes
-int execute() {
+int main() {
 
   int status;
   while (1) {
@@ -95,14 +94,18 @@ int execute() {
       char ** sub_args=parse_args(trim_white(args[i]),' ');
       if (fork()==0) {
 	if (!strcmp(sub_args[0],"exit")) {
+	  //printf("%s\n",sub_args[0]);
 	  return 1;
 	}
 	execvp(sub_args[0],sub_args);
       }
       else {
 	wait(&status);
-	if (WEXITSTATUS(status)==1)//exits
-	  return 0;
+	//printf("%d\n",WEXITSTATUS(status));
+	if (WEXITSTATUS(status)==1){//exits
+	  //printf("exiting\n");
+	  exit(0);
+	}
 	i++;
       }
     }
@@ -111,9 +114,9 @@ int execute() {
   return 0;
   
 }
-
+/*
 int main() {
 
   execute();
   return 0;
-}
+  }*/
