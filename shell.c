@@ -88,14 +88,26 @@ int main() {
   while (1) {
     char ** args=parse_args(read_buff(),';');
     int total=array_of_str_len(args);
+    
     //printf("total: %d\n",total);
     int i=0;
     while (i<total) {
       char ** sub_args=parse_args(trim_white(args[i]),' ');
+      int fd[2];
+      pipe(fd);
       if (fork()==0) {
 	if (!strcmp(sub_args[0],"exit")) {
 	  //printf("%s\n",sub_args[0]);
 	  return 1;
+	}
+	if(!strcmp(sub_args[0], "cd")) {
+	  close(fd[1]);
+	  char s[sizeof(sub_args[1])];
+	  strcpy (s, sub_args[1]);
+	  printf("%s\n", sub_args[1]);
+	  printf("%s\n", s);
+	  write(fd[0], s, sizeof(s));
+	  return 2;
 	}
 	execvp(sub_args[0],sub_args);
       }
@@ -105,6 +117,13 @@ int main() {
 	if (WEXITSTATUS(status)==1){//exits
 	  //printf("exiting\n");
 	  exit(0);
+	}
+	if (WEXITSTATUS(status) == 2) {
+	  close(fd[0]);
+	  char s[256];
+	  read(fd[1], s, sizeof(s));
+	  printf("%s\n", s);
+	  chdir(sub_args[2]);
 	}
 	i++;
       }
