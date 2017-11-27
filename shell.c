@@ -80,10 +80,10 @@ int array_of_str_len(char ** s) {
 }
 
 
-//main()
+//execute()
 //pre: none
 //splits input from buffer on semicolon, then splits again based on white space, then executes
-int main() {
+int execute() {
 
   int status;
   while (1) {
@@ -143,9 +143,9 @@ int main() {
   return 0;
   
 }
-/*
+
 int main() {
 
-  execute();
-  return 0;
-  }*/
+  return execute();
+}
+
