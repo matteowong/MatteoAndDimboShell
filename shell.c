@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <signal.h>
 #include <string.h>
+#include <errno.h>
 
 
 //char * trim_white(char * s)
@@ -92,21 +93,26 @@ int main() {
     //printf("total: %d\n",total);
     int i=0;
     while (i<total) {
+      printf("%d: %s\n",i,args[i]);
+      i++;
+    }
+    i=0;
+    while (i<total) {
       char ** sub_args=parse_args(trim_white(args[i]),' ');
-      int fd[2];
-      pipe(fd);
+      /*int fd[2];
+	pipe(fd);*/
       if (fork()==0) {
 	if (!strcmp(sub_args[0],"exit")) {
 	  //printf("%s\n",sub_args[0]);
 	  return 1;
 	}
-	if(!strcmp(sub_args[0], "cd")) {
-	  close(fd[1]);
+	if (!strcmp(sub_args[0], "cd")) {
+	  /*close(fd[0]);
 	  char s[sizeof(sub_args[1])];
 	  strcpy (s, sub_args[1]);
 	  printf("%s\n", sub_args[1]);
 	  printf("%s\n", s);
-	  write(fd[0], s, sizeof(s));
+	  write(fd[1], s, sizeof(s));*/
 	  return 2;
 	}
 	execvp(sub_args[0],sub_args);
@@ -119,12 +125,16 @@ int main() {
 	  exit(0);
 	}
 	if (WEXITSTATUS(status) == 2) {
-	  close(fd[0]);
+	  /*close(fd[1]);
 	  char s[256];
-	  read(fd[1], s, sizeof(s));
-	  printf("%s\n", s);
-	  chdir(sub_args[2]);
+	  read(fd[0], s, sizeof(s));
+	  printf("%s\n", s);*/
+	  printf("changing directory\n");
+	  if (sub_args[1]&&chdir(sub_args[1])) {
+	    printf("chdir error: %s\n",strerror(errno));
+	  }
 	}
+	status=0;
 	i++;
       }
     }
