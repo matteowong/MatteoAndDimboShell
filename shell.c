@@ -4,6 +4,7 @@
 #include <signal.h>
 #include <string.h>
 #include <errno.h>
+#include <fcntl.h>
 
 
 //char * trim_white(char * s)
@@ -80,6 +81,44 @@ int array_of_str_len(char ** s) {
 }
 
 
+//redirect()
+//pre: given the symbol for redirecting (i.e. >, >>, etc.) and the path to file that will be redirected to/from
+//post: returns file descriptor to the std file that was replaced (stdout, stdin, etc)
+int redirect(char * symbol, char * file) {
+  int std_copy;
+  int fd;
+  if (!strcmp(symbol,">"))
+    fd=open(file,O_TRUNC | O_CREAT | O_WRONLY,0644);
+  else if (strcmp(symbol,"<"))
+    fd=open(file,O_CREAT | O_RDONLY,0644);
+  else if (!strcmp(symbol,">>"))
+    fd=open(file,O_APPEND | O_CREAT | O_WRONLY,0644);
+  if (symbol[0]=='>') {
+    std_copy=dup(1);//duplicate standard out
+    dup2(fd,1);
+  } else if (symbol[0]=='<') {//standard in
+    std_copy=-1*dup(0);
+    dup2(fd,0);
+  }
+  return std_copy;
+}
+
+//returns index of redirection symbol if the given segment requires redirecting
+int if_redirect(char ** s) {
+
+  int i=array_of_str_len(s)-1;
+  while (i>=0) {
+    if (!(strcmp(s[i],">") && strcmp(s[i],">>") && strcmp(s[i],"<"))) {
+      //printf("index of redirect: %d\n",i);
+      return i;
+    }
+    i--;
+  }
+  return 0;
+
+}
+
+
 //execute()
 //pre: none
 //splits input from buffer on semicolon, then splits again based on white space, then executes
@@ -92,47 +131,64 @@ int execute() {
     
     //printf("total: %d\n",total);
     int i=0;
-    while (i<total) {
+    /*while (i<total) {
       printf("%d: %s\n",i,args[i]);
       i++;
-    }
-    i=0;
+      }
+      i=0;*/
     while (i<total) {
       char ** sub_args=parse_args(trim_white(args[i]),' ');
-      /*int fd[2];
-	pipe(fd);*/
+      int fd[2];
+      pipe(fd);
       if (fork()==0) {
+	close(fd[0]);//close reading
 	if (!strcmp(sub_args[0],"exit")) {
-	  //printf("%s\n",sub_args[0]);
+	  int j=-1;
+	  write(fd[1],&j,sizeof(int));
+	  //write(fd[1],&j,sizeof(int));
 	  return 1;
 	}
-	if (!strcmp(sub_args[0], "cd")) {
-	  /*close(fd[0]);
-	  char s[sizeof(sub_args[1])];
-	  strcpy (s, sub_args[1]);
-	  printf("%s\n", sub_args[1]);
-	  printf("%s\n", s);
-	  write(fd[1], s, sizeof(s));*/
+	else if (!strcmp(sub_args[0], "cd")) {
+	  int j=-1;
+	  write(fd[1],&j,sizeof(int));
+	  //write(fd[1],&j,sizeof(int));
 	  return 2;
 	}
-	execvp(sub_args[0],sub_args);
+	else if (if_redirect(sub_args)) {
+	  printf("redirecting\n");
+	  int ind=if_redirect(sub_args);
+	  int std_fd=redirect(sub_args[ind],sub_args[ind+1]);
+
+	  sub_args[ind]=0;
+	  write(fd[1],&std_fd,sizeof(int));
+	  execvp(sub_args[0],sub_args);
+
+	}
+	else
+	  execvp(sub_args[0],sub_args);
       }
       else {
+	close(fd[1]);//close writing
+	int j=0;
+	read(fd[0],&j,sizeof(int));
 	wait(&status);
 	//printf("%d\n",WEXITSTATUS(status));
 	if (WEXITSTATUS(status)==1){//exits
 	  //printf("exiting\n");
 	  exit(0);
 	}
-	if (WEXITSTATUS(status) == 2) {
-	  /*close(fd[1]);
-	  char s[256];
-	  read(fd[0], s, sizeof(s));
-	  printf("%s\n", s);*/
-	  printf("changing directory\n");
+	else if (WEXITSTATUS(status) == 2) {
+	  //printf("changing directory\n");
 	  if (sub_args[1]&&chdir(sub_args[1])) {
 	    printf("chdir error: %s\n",strerror(errno));
 	  }
+	}
+	else if (j>0) {
+	  printf("fixing stuff\n");
+	  dup2(j,1);
+	}
+	else if (j<0) {
+	  dup2(j,0);
 	}
 	status=0;
 	i++;
