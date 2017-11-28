@@ -143,34 +143,38 @@ int execute() {
       if (fork()==0) {
 	close(fd[0]);//close reading
 	if (!strcmp(sub_args[0],"exit")) {
-	  int j=-1;
-	  write(fd[1],&j,sizeof(int));
+	  printf("from shell exiting\n");
+	  //int j=0;
+	  //write(fd[1],&j,sizeof(int));
 	  //write(fd[1],&j,sizeof(int));
 	  return 1;
 	}
 	else if (!strcmp(sub_args[0], "cd")) {
-	  int j=-1;
-	  write(fd[1],&j,sizeof(int));
+	  printf("from shell cd-ing\n");
+	  //int j=0;
+	  //write(fd[1],&j,sizeof(int));
 	  //write(fd[1],&j,sizeof(int));
 	  return 2;
 	}
-	else if (if_redirect(sub_args)) {
-	  printf("redirecting\n");
+	/*else if (if_redirect(sub_args)) {
+	  printf("from shell redirecting\n");
 	  int ind=if_redirect(sub_args);
 	  int std_fd=redirect(sub_args[ind],sub_args[ind+1]);
-
 	  sub_args[ind]=0;
 	  write(fd[1],&std_fd,sizeof(int));
 	  execvp(sub_args[0],sub_args);
-
-	}
-	else
+	  return 0;
+	  }*/
+	else {
+	  printf("normal\n");
 	  execvp(sub_args[0],sub_args);
+	  return 0;
+	}
       }
       else {
 	close(fd[1]);//close writing
-	int j=0;
-	read(fd[0],&j,sizeof(int));
+	//int j=0;
+	//read(fd[0],&j,sizeof(int));
 	wait(&status);
 	//printf("%d\n",WEXITSTATUS(status));
 	if (WEXITSTATUS(status)==1){//exits
@@ -179,17 +183,24 @@ int execute() {
 	}
 	else if (WEXITSTATUS(status) == 2) {
 	  //printf("changing directory\n");
+	  printf("dir to enter: [%s]\n",sub_args[1]);
 	  if (sub_args[1]&&chdir(sub_args[1])) {
 	    printf("chdir error: %s\n",strerror(errno));
 	  }
 	}
-	else if (j>0) {
-	  printf("fixing stuff\n");
-	  dup2(j,1);
-	}
-	else if (j<0) {
-	  dup2(j,0);
-	}
+	/*else {
+	  int j=0;
+	  read(fd[0],&j,sizeof(int));
+	  if (j>0) {
+	    //printf("fixing stuff\n");
+	    dup2(j,1);
+	  }
+	  else if (j<0) {
+	    j*=-1;
+	    dup2(j,0);
+	  }
+	  }*/
+	//j=0;
 	status=0;
 	i++;
       }
