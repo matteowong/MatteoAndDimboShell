@@ -1,0 +1,8 @@
+echo cd-ing
+cd ..;pwd;cd MatteoAndDimboShell;pwd
+cd ..;pwd;cd MatteoAndDimboShell;pwd
+cd ..;pwd;cd MatteoAndDimboShell;pwd
+cd ..;pwd;cd MatteoAndDimboShell;pwd
+cd ..;pwd;cd MatteoAndDimboShell;pwd
+cd ..;pwd;cd MatteoAndDimboShell;pwd
+exit
