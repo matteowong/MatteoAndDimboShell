@@ -1,11 +1,10 @@
-echo regular
-ls
-pwd
-ls -a -l;ps
+echo normal
+ls -a -l;pwd
+ps
 echo cd-ing
 cd ..;pwd
 echo redirecting
-ls > foo;cat foo
+ls -a -l > foo;cat foo
 ps > foo;cat foo
 echo exiting
 exit

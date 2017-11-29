@@ -84,21 +84,35 @@ int array_of_str_len(char ** s) {
 //pre: given the symbol for redirecting (i.e. >, >>, etc.) and the path to file that will be redirected to/from
 //post: returns file descriptor to the std file that was replaced (stdout, stdin, etc)
 int redirect(char * symbol, char * file) {
+  printf("redirect() started\n");
   int std_copy;
   int fd;
-  if (!strcmp(symbol,">"))
+  if (!strcmp(symbol,">")) {
     fd=open(file,O_TRUNC | O_CREAT | O_WRONLY,0644);
-  else if (strcmp(symbol,"<"))
-    fd=open(file,O_CREAT | O_RDONLY,0644);
+    std_copy=dup(1);
+    printf("redirected [%d] to stdout\n",fd);
+    dup2(fd,1);
+    
+  }
+  else if (!strcmp(symbol,"<")) {
+    printf("redirecting stdin in redirect()\n");
+    fd=open(file,O_CREAT | O_RDWR,0644);
+    printf("opened\n");
+    std_copy=dup(0);
+    std_copy=std_copy*-1;
+    printf("redirected [%d] to stdin\n",fd);
+    dup2(fd,0);
+  }
   /*else if (!strcmp(symbol,">>"))
-    fd=open(file,O_APPEND | O_CREAT | O_WRONLY,0644);*/
+    fd=open(file,O_APPEND | O_CREAT | O_WRONLY,0644);
   if (symbol[0]=='>') {
     std_copy=dup(1);//duplicate standard out
     dup2(fd,1);
   } else if (symbol[0]=='<') {//standard in
+    printf("redirecting stdin\n");
     std_copy=-1*dup(0);
     dup2(fd,0);
-  }
+    }*/
   return std_copy;
 }
 
@@ -125,6 +139,7 @@ int execute() {
 
   int status;
   while (1) {
+    printf("MatteoAndDimboShell$ ");
     char ** args=parse_args(read_buff(),";");
     int total=array_of_str_len(args);
     
@@ -150,12 +165,14 @@ int execute() {
 	  return 2;
 	}
 	else if (if_redirect(sub_args)) {
-	  //printf("from shell redirecting\n");
 	  int ind=if_redirect(sub_args);
 	  int std_fd=redirect(sub_args[ind],sub_args[ind+1]);
+	  //printf("[%s]\n",sub_args[ind+1]);
 	  sub_args[ind]=0;
 	  write(fd[1],&std_fd,sizeof(int));
 	  close(fd[1]);
+	  //printf("execute is redirecting\n");
+	  //printf("[%s] [%s]\n",sub_args[0],sub_args[1]);
 	  execvp(sub_args[0],sub_args);
 	  return 0;
 	}
@@ -193,6 +210,7 @@ int execute() {
 	    dup2(j,1);
 	  }
 	  else if (j<0) {
+	    printf("redirected stdin\n");
 	    j*=-1;
 	    dup2(j,0);
 	  }
