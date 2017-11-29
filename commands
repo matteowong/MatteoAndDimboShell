@@ -1,8 +1,11 @@
+echo regular
+ls
+pwd
+ls -a -l;ps
 echo cd-ing
-cd ..;pwd;cd MatteoAndDimboShell;pwd
-cd ..;pwd;cd MatteoAndDimboShell;pwd
-cd ..;pwd;cd MatteoAndDimboShell;pwd
-cd ..;pwd;cd MatteoAndDimboShell;pwd
-cd ..;pwd;cd MatteoAndDimboShell;pwd
-cd ..;pwd;cd MatteoAndDimboShell;pwd
+cd ..;pwd
+echo redirecting
+ls > foo;cat foo
+ps > foo;cat foo
+echo exiting
 exit

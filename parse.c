@@ -130,11 +130,11 @@ int execute() {
     
     //printf("total: %d\n",total);
     int i=0;
-    while (i<total) {
+    /*while (i<total) {
       printf("%d: %s\n",i,args[i]);
       i++;
-    }
-    i=0;
+      }
+      i=0;*/
     while (i<total) {
       char ** sub_args=parse_args(trim_white(args[i])," ");
       int fd[2];
@@ -142,30 +142,25 @@ int execute() {
       if (fork()==0) {
 	close(fd[0]);//close reading
 	if (!strcmp(sub_args[0],"exit")) {
-	  printf("from shell exiting\n");
-	  //int j=0;
-	  //write(fd[1],&j,sizeof(int));
-	  //write(fd[1],&j,sizeof(int));
-	  return 1;
+	  close(fd[1]);
+       	  return 1;
 	}
 	else if (!strcmp(sub_args[0], "cd")) {
-	  printf("from shell cd-ing\n");
-	  //int j=0;
-	  //write(fd[1],&j,sizeof(int));
-	  //write(fd[1],&j,sizeof(int));
+	  close(fd[1]);
 	  return 2;
 	}
-	/*else if (if_redirect(sub_args)) {
-	  printf("from shell redirecting\n");
+	else if (if_redirect(sub_args)) {
+	  //printf("from shell redirecting\n");
 	  int ind=if_redirect(sub_args);
 	  int std_fd=redirect(sub_args[ind],sub_args[ind+1]);
 	  sub_args[ind]=0;
 	  write(fd[1],&std_fd,sizeof(int));
+	  close(fd[1]);
 	  execvp(sub_args[0],sub_args);
 	  return 0;
-	  }*/
+	}
 	else {
-	  printf("normal\n");
+	  //printf("normal\n");
 	  execvp(sub_args[0],sub_args);
 	  return 0;
 	}
@@ -178,28 +173,31 @@ int execute() {
 	//printf("%d\n",WEXITSTATUS(status));
 	if (WEXITSTATUS(status)==1){//exits
 	  //printf("exiting\n");
+	  close(fd[0]);
 	  exit(0);
 	}
 	else if (WEXITSTATUS(status) == 2) {
 	  //printf("changing directory\n");
-	  printf("dir to enter: [%s]\n",sub_args[1]);
+	  //printf("dir to enter: [%s]\n",sub_args[1]);
 	  //printf("dir to enter: [%s]\n",sub_args[2]);
+	  close(fd[0]);
 	  if (sub_args[1]&&chdir(sub_args[1])) {
 	    printf("chdir error: %s\n",strerror(errno));
 	  }
 	}
-	/*else {
+	else {
 	  int j=0;
 	  read(fd[0],&j,sizeof(int));
 	  if (j>0) {
-	  //printf("fixing stuff\n");
-	  dup2(j,1);
+	    //printf("fixing stuff\n");
+	    dup2(j,1);
 	  }
 	  else if (j<0) {
-	  j*=-1;
-	  dup2(j,0);
+	    j*=-1;
+	    dup2(j,0);
 	  }
-	  }*/
+	  close(fd[0]);
+	}
 	//j=0;
 	status=0;
 	i++;
