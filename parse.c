@@ -48,6 +48,8 @@ int num_tokens(char * s, char * delim){
       //printf("added %d\n",i);
     }
   }
+  //if (!strcmp(s,"exit"))
+  //printf("exit command num tokens\n");
   return ret;
 
 
@@ -84,23 +86,23 @@ int array_of_str_len(char ** s) {
 //pre: given the symbol for redirecting (i.e. >, >>, etc.) and the path to file that will be redirected to/from
 //post: returns file descriptor to the std file that was replaced (stdout, stdin, etc)
 int redirect(char * symbol, char * file) {
-  printf("redirect() started\n");
+  //printf("redirect() started\n");
   int std_copy;
   int fd;
   if (!strcmp(symbol,">")) {
     fd=open(file,O_TRUNC | O_CREAT | O_WRONLY,0644);
     std_copy=dup(1);
-    printf("redirected [%d] to stdout\n",fd);
+    //printf("redirected [%d] to stdout\n",fd);
     dup2(fd,1);
     
   }
   else if (!strcmp(symbol,"<")) {
-    printf("redirecting stdin in redirect()\n");
+    //printf("redirecting stdin in redirect()\n");
     fd=open(file,O_CREAT | O_RDWR,0644);
-    printf("opened\n");
+    //printf("opened\n");
     std_copy=dup(0);
     std_copy=std_copy*-1;
-    printf("redirected [%d] to stdin\n",fd);
+    //printf("redirected [%d] to stdin\n",fd);
     dup2(fd,0);
   }
   /*else if (!strcmp(symbol,">>"))
@@ -139,8 +141,12 @@ int execute() {
 
   int status;
   while (1) {
-    printf("MatteoAndDimboShell$ ");
-    char ** args=parse_args(read_buff(),";");
+    //printf("MatteoAndDimboShell$ ");
+    char * s=read_buff();
+
+
+    char ** args=parse_args(s,";");
+    
     int total=array_of_str_len(args);
     
     //printf("total: %d\n",total);
@@ -156,6 +162,7 @@ int execute() {
       pipe(fd);
       if (fork()==0) {
 	close(fd[0]);//close reading
+	printf("sub_args[0]: [%s]\n",sub_args[0]);
 	if (!strcmp(sub_args[0],"exit")) {
 	  close(fd[1]);
        	  return 1;
@@ -189,12 +196,16 @@ int execute() {
 	wait(&status);
 	//printf("%d\n",WEXITSTATUS(status));
 	if (WEXITSTATUS(status)==1){//exits
+	  printf("parse.c: exit\n");
 	  //printf("exiting\n");
 	  close(fd[0]);
-	  exit(0);
+	  free(s);
+	  free(sub_args);
+	  free(args);
+	  return 0;
 	}
 	else if (WEXITSTATUS(status) == 2) {
-	  //printf("changing directory\n");
+	  printf("parse.c: changing directory\n");
 	  //printf("dir to enter: [%s]\n",sub_args[1]);
 	  //printf("dir to enter: [%s]\n",sub_args[2]);
 	  close(fd[0]);
@@ -206,21 +217,24 @@ int execute() {
 	  int j=0;
 	  read(fd[0],&j,sizeof(int));
 	  if (j>0) {
-	    //printf("fixing stuff\n");
+	    printf("parse.c: redirected stdout\n");
 	    dup2(j,1);
 	  }
 	  else if (j<0) {
-	    printf("redirected stdin\n");
+	    printf("parse.c: redirected stdin\n");
 	    j*=-1;
 	    dup2(j,0);
 	  }
 	  close(fd[0]);
 	}
 	//j=0;
+	free(sub_args);
 	status=0;
 	i++;
       }
     }
+    free(s);
+    free(args);
 
   }
   return 0;
