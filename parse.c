@@ -242,7 +242,7 @@ int execute() {
 	close(fd[1]);//close writing
 	wait(&status);//waits for child to finish
 	if (WEXITSTATUS(status)==1){//exits
-	  printf("parse.c: exit\n");
+	  //printf("parse.c: exit\n");
 	  //printf("exiting\n");
 	  close(fd[0]);
 	  free(s);
@@ -251,7 +251,7 @@ int execute() {
 	  return 0;
 	}
 	else if (WEXITSTATUS(status) == 2) {//cd
-	  printf("parse.c: changing directory\n");
+	  //printf("parse.c: changing directory\n");
 	  //printf("dir to enter: [%s]\n",sub_args[1]);
 	  //printf("dir to enter: [%s]\n",sub_args[2]);
 	  close(fd[0]);
