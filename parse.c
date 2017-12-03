@@ -162,7 +162,7 @@ int execute() {
       pipe(fd);
       if (fork()==0) {
 	close(fd[0]);//close reading
-	printf("sub_args[0]: [%s]\n",sub_args[0]);
+	printf("sub_args[1]: [%s]\n",sub_args[1]);
 	if (!strcmp(sub_args[0],"exit")) {
 	  close(fd[1]);
        	  return 1;
@@ -170,6 +170,9 @@ int execute() {
 	else if (!strcmp(sub_args[0], "cd")) {
 	  close(fd[1]);
 	  return 2;
+	}else if (!strcmp(sub_args[1], "|")) {
+	  close(fd[1]);
+	  return 3;
 	}
 	else if (if_redirect(sub_args)) {
 	  int ind=if_redirect(sub_args);
@@ -190,10 +193,13 @@ int execute() {
 	}
       }
       else {
+	printf ("1");
 	close(fd[1]);//close writing
 	//int j=0;
 	//read(fd[0],&j,sizeof(int));
+	printf ("2");
 	wait(&status);
+	printf ("3");
 	//printf("%d\n",WEXITSTATUS(status));
 	if (WEXITSTATUS(status)==1){//exits
 	  printf("parse.c: exit\n");
@@ -212,6 +218,16 @@ int execute() {
 	  if (sub_args[1]&&chdir(sub_args[1])) {
 	    printf("chdir error: %s\n",strerror(errno));
 	  }
+	}
+	else if (WEXITSTATUS(status) == 3) {
+	  printf("sdasd");
+	  FILE *fp;
+	  char path[1035];
+
+	  fp = popen(sub_args[1], "r");
+	  while (fgets(path, sizeof(path)-1, fp));
+	  pclose(fp);
+	  execvp(sub_args[2], path);
 	}
 	else {
 	  int j=0;
