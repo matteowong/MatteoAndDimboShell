@@ -22,7 +22,7 @@ char * trim_white(char * s) {
 
 }
 
-//read_buff()
+//char * read_buff()
 //pre: none
 //post: reads in and returns a string of up to 255 characters from standard in, replaces new line with NULL
 char * read_buff() {
@@ -35,9 +35,9 @@ char * read_buff() {
 }
 
 
-//num_tokens
-//pre: takes a string
-//post: returns number of tokens separated by a space in given string
+//int num_tokens(char * s, char * delim)
+//pre: takes a string and delimeter (single char char*)
+//post: returns number of tokens separated by the delimeter in given string
 int num_tokens(char * s, char * delim){
   //printf("s is %s\n",s);
   int ret=1;
@@ -55,9 +55,9 @@ int num_tokens(char * s, char * delim){
 
 }
 
-//parse_args
-//pre: takes a string separated by spaces
-//post: returns an array of strings, each index holding one token from the inputted line (each token is separated by a single space in the input line)
+//char ** parse_args(char * line, char * delim)
+//pre: takes a string separated by delimeter (also a string, single char)
+//post: returns an array of strings, each index holding one token from the inputted line (each token is separated by a single delim in the input line)
 char** parse_args(char * line, char * delim) {
 
   char ** s=(char **)calloc(sizeof(char *),num_tokens(line, delim)+1);
@@ -75,6 +75,9 @@ char** parse_args(char * line, char * delim) {
 
 }
 
+//int array_of_str_len(char ** s)
+//pre: array of strings
+//post: returns the number of strings/tokens in the array (ie. {"hi","bye"} -> 2
 int array_of_str_len(char ** s) {
   int i=0;
   while (s[i++]);
@@ -82,9 +85,10 @@ int array_of_str_len(char ** s) {
 }
 
 
-//redirect()
-//pre: given the symbol for redirecting (i.e. >, >>, etc.) and the path to file that will be redirected to/from
-//post: returns file descriptor to the std file that was replaced (stdout, stdin, etc)
+//int redirect(char * symbol, char * file)
+//pre: given the symbol for redirecting (> or <) and the path to file that will be redirected to/from
+//what function does: redirects file to stdin or stdout
+//post: returns file descriptor to the std file that was replaced (stdout or stdin)
 int redirect(char * symbol, char * file) {
   //printf("redirect() started\n");
   int std_copy;
@@ -101,7 +105,7 @@ int redirect(char * symbol, char * file) {
     fd=open(file,O_CREAT | O_RDWR,0644);
     //printf("opened\n");
     std_copy=dup(0);
-    std_copy=std_copy*-1;
+    std_copy=std_copy*-1;//negative is how we identify redirecting stdin vs stdout
     //printf("redirected [%d] to stdin\n",fd);
     dup2(fd,0);
   }
@@ -118,7 +122,9 @@ int redirect(char * symbol, char * file) {
   return std_copy;
 }
 
-//returns index of redirection symbol if the given segment requires redirecting
+//int if_redirect(char ** s)
+//pre: takes an array of strings
+//post: returns index of redirection symbol (< or >) if the given segment requires redirecting. assumes redirect symbol isn't in 0th index
 int if_redirect(char ** s) {
 
   int i=array_of_str_len(s)-1;
@@ -133,21 +139,59 @@ int if_redirect(char ** s) {
 
 }
 
+//int if_pipe(char ** s)
+//pre: array of strings
+//post: returns index of pipe ("|") or 0 if not there (assumes pipe isn't in 0th index)
+int if_pipe(char ** s) {
+  int i=array_of_str_len(s)-1;
+  while (i>-0) {
+    if (!strcmp(s[i],"|"))
+      return i;
+    i--;
+  }
+  return 0;
+}
 
-//execute()
+//void our_pipe(char ** args)
+//pre: takes an array of strings that has a pipe in it in format <command 1> | <command 2>
+//what function does: opens to pipes with popen. reads output of command 1 from the first pipe, fp_r, into a string, then reads the string, s,  into fp_w, which passes s to command 2. 
+//post: void
+void our_pipe(char ** args){
+
+  FILE * fp_r;
+  FILE * fp_w;
+  fp_r=popen(args[0],"r");
+  fp_w=popen(args[if_pipe(args)+1],"w");
+  char s[1000];
+  char temp[256];
+  while (fgets(temp,256,fp_r)) {
+    strcat(s,temp);
+    //printf("%s\n",s);
+  }
+  fprintf(fp_w,"%s",s);
+  fclose(fp_r);
+  fclose(fp_w);
+  //printf("%s\n",s);
+  
+
+}
+
+
+//int execute()
 //pre: none
-//splits input from buffer on semicolon, then splits again based on white space, then executes
+//splits input from buffer on semicolon, then splits again based on white space, then executes - detailed explanation in code
+//post: returns integer just b/c it has to for the main/for exit
 int execute() {
 
   int status;
-  while (1) {
-    //printf("MatteoAndDimboShell$ ");
-    char * s=read_buff();
+  while (1) {//infinite while loop
+    printf("MatteoAndDimboShell$ ");//prompt
+    char * s=read_buff();//reads in
 
 
-    char ** args=parse_args(s,";");
+    char ** args=parse_args(s,";");//parse on semicolon
     
-    int total=array_of_str_len(args);
+    int total=array_of_str_len(args);//number of commands separated by semicolon
     
     //printf("total: %d\n",total);
     int i=0;
@@ -156,30 +200,31 @@ int execute() {
       i++;
       }
       i=0;*/
-    while (i<total) {
-      char ** sub_args=parse_args(trim_white(args[i])," ");
-      int fd[2];
+    while (i<total) {//loops through all commands separated by semicolons
+      char ** sub_args=parse_args(trim_white(args[i])," ");//separate ith group of commands on space
+      int fd[2];//pipe for reading in
       pipe(fd);
-      if (fork()==0) {
+      if (fork()==0) {//child
 	close(fd[0]);//close reading
-	printf("sub_args[1]: [%s]\n",sub_args[1]);
-	if (!strcmp(sub_args[0],"exit")) {
+	//printf("sub_args[0]: [%s]\n",sub_args[0]);
+	if (!strcmp(sub_args[0],"exit")) {//exiting
 	  close(fd[1]);
        	  return 1;
 	}
-	else if (!strcmp(sub_args[0], "cd")) {
+	else if (!strcmp(sub_args[0], "cd")) {//changing directory
 	  close(fd[1]);
 	  return 2;
-	}else if (!strcmp(sub_args[1], "|")) {
+	}else if (if_pipe(sub_args)) {//piping
 	  close(fd[1]);
+	  our_pipe(sub_args);
 	  return 3;
 	}
-	else if (if_redirect(sub_args)) {
+	else if (if_redirect(sub_args)) {//redirecting
 	  int ind=if_redirect(sub_args);
 	  int std_fd=redirect(sub_args[ind],sub_args[ind+1]);
 	  //printf("[%s]\n",sub_args[ind+1]);
 	  sub_args[ind]=0;
-	  write(fd[1],&std_fd,sizeof(int));
+	  write(fd[1],&std_fd,sizeof(int));//writes what the new fd for stdin/out made through dup() is so it can be fixed later
 	  close(fd[1]);
 	  //printf("execute is redirecting\n");
 	  //printf("[%s] [%s]\n",sub_args[0],sub_args[1]);
@@ -192,15 +237,10 @@ int execute() {
 	  return 0;
 	}
       }
-      else {
-	printf ("1");
+      else {//parent process
+	//printf ("1");
 	close(fd[1]);//close writing
-	//int j=0;
-	//read(fd[0],&j,sizeof(int));
-	printf ("2");
-	wait(&status);
-	printf ("3");
-	//printf("%d\n",WEXITSTATUS(status));
+	wait(&status);//waits for child to finish
 	if (WEXITSTATUS(status)==1){//exits
 	  printf("parse.c: exit\n");
 	  //printf("exiting\n");
@@ -210,7 +250,7 @@ int execute() {
 	  free(args);
 	  return 0;
 	}
-	else if (WEXITSTATUS(status) == 2) {
+	else if (WEXITSTATUS(status) == 2) {//cd
 	  printf("parse.c: changing directory\n");
 	  //printf("dir to enter: [%s]\n",sub_args[1]);
 	  //printf("dir to enter: [%s]\n",sub_args[2]);
@@ -219,25 +259,25 @@ int execute() {
 	    printf("chdir error: %s\n",strerror(errno));
 	  }
 	}
-	else if (WEXITSTATUS(status) == 3) {
-	  printf("sdasd");
+	else if (WEXITSTATUS(status) == 3) {//pipe
+	  /*printf("sdasd");
 	  FILE *fp;
 	  char path[1035];
 
 	  fp = popen(sub_args[1], "r");
 	  while (fgets(path, sizeof(path)-1, fp));
 	  pclose(fp);
-	  execvp(sub_args[2], path);
-	}
-	else {
-	  int j=0;
+	  execvp(sub_args[2], path);*/
+	  }
+	else {//redirecting
+	  int j=0;//if no redirecting it will equal 0 and skip the following things
 	  read(fd[0],&j,sizeof(int));
 	  if (j>0) {
-	    printf("parse.c: redirected stdout\n");
+	    //printf("parse.c: redirected stdout\n");
 	    dup2(j,1);
 	  }
 	  else if (j<0) {
-	    printf("parse.c: redirected stdin\n");
+	    //printf("parse.c: redirected stdin\n");
 	    j*=-1;
 	    dup2(j,0);
 	  }
