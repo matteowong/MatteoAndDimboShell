@@ -2,13 +2,21 @@
 
 Features that are implemented in our shell:
 
+
   Reads the input a line at a time and parses it
+  
   Any unneccesary whitespace is removed
+  
   Executes regular commands
+  
   Executes cd commands
+  
   Executes piped commands
+  
   Executing exit
+  
   Executes commands with simple redirection
+	
 	
 Features we wished to implement but could not:
 
