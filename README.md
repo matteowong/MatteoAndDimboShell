@@ -29,7 +29,7 @@ Bugs we encountered:
 
 
 
-  * On Linux our commands file would produce the prompt ad infinitum if there was no newline at the end, this problem does not occur on Mac (eg. when testing with ./shell < commands on linux, there needs to be a new line [ENTER] at the end of the commands file). This was extremely frustrating, we spent several hours trying to get around it but could not. A similar infinite loop happens when doing echo ls | ./shell
+  * On Linux our commands file would produce the prompt ad infinitum if there was no newline at the end, this problem does not occur on Mac (eg. when testing with ./shell < commands on linux, there needs to be a new line [ENTER] at the end of the commands file). This was extremely frustrating, we spent several hours trying to get around it but could not. A similar infinite loop happens if trying to put input not through the command line and there is no new line character
   
   * at the end of a list of commands running the same amount of prompts will be produced (you said that this was fine)
   

@@ -9,6 +9,7 @@
 //char * trim_white(char * s)
 //pre: takes a character pointer
 //post: returns pointer to first non-white space character and makes all terminating white space into null pointers (trims white space)
+//looks for white space (space or new line) and sets to null or updates where pointer starts
 char * trim_white(char * s) {
 
   while (*s==' ') {
@@ -25,6 +26,7 @@ char * trim_white(char * s) {
 //char * read_buff()
 //pre: none
 //post: reads in and returns a string of up to 255 characters from standard in, replaces new line with NULL
+//reads from buffer using fgets, limited to 255 characters, allocates space with calloc to ensure terminating null
 char * read_buff() {
 
   char * s=(char *)calloc(256,1);
@@ -38,6 +40,7 @@ char * read_buff() {
 //int num_tokens(char * s, char * delim)
 //pre: takes a string and delimeter (single char char*)
 //post: returns number of tokens separated by the delimeter in given string
+//starts at 1 and increments at every occurrence in a for loop that goines by character
 int num_tokens(char * s, char * delim){
   //printf("s is %s\n",s);
   int ret=1;
@@ -55,7 +58,9 @@ int num_tokens(char * s, char * delim){
 
 }
 
-/*int num_tokens_multiple_white(char * s){
+/*
+attempt at separating with multiple white spaces
+int num_tokens_multiple_white(char * s){
   int ret=1;
   int past=-1;
   int i=1;
@@ -70,6 +75,7 @@ int num_tokens(char * s, char * delim){
 //char ** parse_args(char * line, char * delim)
 //pre: takes a string separated by delimeter (also a string, single char)
 //post: returns an array of strings, each index holding one token from the inputted line (each token is separated by a single delim in the input line)
+//allocates space based on size of line using calloc to ensure terminating null, then goes through and uses strsep
 char** parse_args(char * line, char * delim) {
 
   char ** s=(char **)calloc(sizeof(char *),num_tokens(line, delim)+1);
@@ -88,7 +94,9 @@ char** parse_args(char * line, char * delim) {
 
 }
 
-/*char ** parse_args(char * line) {
+/*
+other part of attempt to separate with multiple white spaces
+char ** parse_args(char * line) {
 
   char ** s=(char **)calloc(sizeof(char *),num_tokens_multiple_white(line)+1);
   int i=0;
@@ -105,6 +113,7 @@ char** parse_args(char * line, char * delim) {
 //int array_of_str_len(char ** s)
 //pre: array of strings
 //post: returns the number of strings/tokens in the array (ie. {"hi","bye"} -> 2
+//functions basically like strlen would but with an array of pointers
 int array_of_str_len(char ** s) {
   int i=0;
   while (s[i++]);
@@ -114,7 +123,7 @@ int array_of_str_len(char ** s) {
 
 //int redirect(char * symbol, char * file)
 //pre: given the symbol for redirecting (> or <) and the path to file that will be redirected to/from
-//what function does: redirects file to stdin or stdout
+//what function does: redirects file to stdin or stdout. First sees if symbol is > or <, then creates a duplicate with dup() and saves the new file descriptor, then uses dup2, then returns new fd
 //post: returns file descriptor to the std file that was replaced (stdout or stdin)
 int redirect(char * symbol, char * file) {
   //printf("redirect() started\n");
@@ -152,6 +161,7 @@ int redirect(char * symbol, char * file) {
 //int if_redirect(char ** s)
 //pre: takes an array of strings
 //post: returns index of redirection symbol (< or >) if the given segment requires redirecting. assumes redirect symbol isn't in 0th index
+//checks if file needs redirecting by searching for > and <
 int if_redirect(char ** s) {
 
   int i=array_of_str_len(s)-1;
@@ -169,6 +179,7 @@ int if_redirect(char ** s) {
 //int if_pipe(char ** s)
 //pre: array of strings
 //post: returns index of pipe ("|") or 0 if not there (assumes pipe isn't in 0th index)
+//checks if file needs piping by looking for |
 int if_pipe(char ** s) {
   int i=array_of_str_len(s)-1;
   while (i>-0) {
@@ -206,16 +217,15 @@ void our_pipe(char ** args){
 
 //int execute()
 //pre: none
-//splits input from buffer on semicolon, then splits again based on white space, then executes - detailed explanation in code
+//splits input from buffer on semicolon, then splits again based on white space, then executes - detailed explanation in code but basically once it is split on the white space it checks if it needs to change directory, exit, pipe, or redirect, and if so does those, if not executes normally
 //post: returns integer just b/c it has to for the main/for exit
 int execute() {
 
   int status;
   while (1) {//infinite while loop
     printf("MatteoAndDimboShell$ ");//prompt
-    char * s=read_buff();//reads in
-
-
+    char * s = read_buff();
+    
     char ** args=parse_args(s,";");//parse on semicolon
     
     int total=array_of_str_len(args);//number of commands separated by semicolon
