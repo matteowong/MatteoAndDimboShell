@@ -232,21 +232,13 @@ void our_pipe(char ** args){
 }
 
 /*void our_pipe_v2(char * args){
-  printf("hi\n");
+  printf("[%s]\n",args);
   FILE * fp_r;
   FILE * fp_w;
-  int i=0;
-  while (i<strlen(args)) {
-    if (args[i]=='|') {
-      printf("hi\n");
-      break;
-    }
-    i++;
-  }
-  args[i]=0;
-  fp_r=popen(args,"r");
-  args=args+i+2;
-  fp_w=popen(args,"w");
+  char ** comm=parse_args(args,"|");
+  printf("[%s]\n",comm[0]);
+  fp_r=popen(comm[0],"r");
+  fp_w=popen(comm[1],"w");
   char s[1000];
   char temp[256];
   while (fgets(temp,256,fp_r)) {
@@ -272,6 +264,7 @@ int execute() {
   while (1) {//infinite while loop
     printf("MatteoAndDimboShell$ ");//prompt
     char * s = read_buff();
+
     
     char ** args=parse_args(s,";");//parse on semicolon
     
@@ -301,7 +294,7 @@ int execute() {
 	}else if (if_pipe(sub_args)) {//piping
 	  close(fd[1]);
 	  our_pipe(sub_args);
-	  //our_pipe_v2(s);
+	  //our_pipe_v2(full);
 	  return 3;
 	}
 	else if (if_redirect(sub_args)) {//redirecting
