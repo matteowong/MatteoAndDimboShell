@@ -36,7 +36,8 @@ Bugs we encountered:
   * at the end of a list of commands running the same amount of prompts will be produced (you said that this was fine)
   
   * some character limits (such as being limited to 255 characters per line)
-  
+
+  * sometimes when piping the buffer prints before the output  
   
 Files/Function Headers:
 
