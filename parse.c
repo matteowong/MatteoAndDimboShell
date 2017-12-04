@@ -198,6 +198,23 @@ void our_pipe(char ** args){
 
   FILE * fp_r;
   FILE * fp_w;
+  //attempt to make pipe take multiple commands
+  /*int i=0;
+  int size;
+  int ind=if_pipe(args);
+  while (i<ind) {
+    size+=strlen(args[i])+1;
+    i++;
+  }
+  i=0;
+  char comm[size];
+  while (i<ind) {
+    strcat(comm,args[i]);
+    strcat(comm," ");
+    i++;
+  }
+  comm[size-1]=0;
+  printf("[%s]\n",comm);*/
   fp_r=popen(args[0],"r");
   fp_w=popen(args[if_pipe(args)+1],"w");
   char s[1000];
@@ -213,6 +230,36 @@ void our_pipe(char ** args){
   
 
 }
+
+/*void our_pipe_v2(char * args){
+  printf("hi\n");
+  FILE * fp_r;
+  FILE * fp_w;
+  int i=0;
+  while (i<strlen(args)) {
+    if (args[i]=='|') {
+      printf("hi\n");
+      break;
+    }
+    i++;
+  }
+  args[i]=0;
+  fp_r=popen(args,"r");
+  args=args+i+2;
+  fp_w=popen(args,"w");
+  char s[1000];
+  char temp[256];
+  while (fgets(temp,256,fp_r)) {
+    strcat(s,temp);
+    //printf("%s\n",s);
+  }
+  fprintf(fp_w,"%s",s);
+  fclose(fp_r);
+  fclose(fp_w);
+  //printf("%s\n",s);
+  
+
+  }*/
 
 
 //int execute()
@@ -254,6 +301,7 @@ int execute() {
 	}else if (if_pipe(sub_args)) {//piping
 	  close(fd[1]);
 	  our_pipe(sub_args);
+	  //our_pipe_v2(s);
 	  return 3;
 	}
 	else if (if_redirect(sub_args)) {//redirecting

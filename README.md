@@ -10,7 +10,7 @@ Features that are implemented in our shell:
   
   * Executes cd commands
   
-  * Executes piped commands (single)
+  * Executes piped commands (single pipe, limited to one command before and after pipe)
   
   * Executing exit
   
@@ -22,6 +22,8 @@ Features we wished to implement but could not:
   * Complex redirection
 
   * Allowing multiple white spaces between commands
+
+  * Allowing pipes to have multiple commands (ie. echo ls | bash)
 	
 	
 	
