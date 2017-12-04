@@ -1,5 +1,5 @@
 all: shell.c
-	gcc shell shell.c parse.c
+	gcc -o shell shell.c parse.c
 
 run: shell
-./shell
+	./shell

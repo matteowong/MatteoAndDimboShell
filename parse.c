@@ -55,6 +55,18 @@ int num_tokens(char * s, char * delim){
 
 }
 
+/*int num_tokens_multiple_white(char * s){
+  int ret=1;
+  int past=-1;
+  int i=1;
+  for (;i<strlen(s);i++) {
+    if (s[i]== ' ' && past>=0 && s[past]!=' ') {
+      ret++;
+    }
+  }
+  return ret;
+  }*/
+
 //char ** parse_args(char * line, char * delim)
 //pre: takes a string separated by delimeter (also a string, single char)
 //post: returns an array of strings, each index holding one token from the inputted line (each token is separated by a single delim in the input line)
@@ -64,7 +76,8 @@ char** parse_args(char * line, char * delim) {
   //printf("line: %s\n",line);
   int i=0;
   while (line){
-    s[i]=line;
+    //if (i==0 && *line!=*delim)
+      s[i]=line;
     //printf("line before strsep: %s\n",line);
     strsep(&line, delim);
     //printf("line after strsep: %s\n",line);
@@ -74,6 +87,20 @@ char** parse_args(char * line, char * delim) {
 
 
 }
+
+/*char ** parse_args(char * line) {
+
+  char ** s=(char **)calloc(sizeof(char *),num_tokens_multiple_white(line)+1);
+  int i=0;
+  while (line) {
+    if (!line[-1])
+      continue;
+    else
+      strsep(&line, " ");
+  }
+
+  }*/
+
 
 //int array_of_str_len(char ** s)
 //pre: array of strings
@@ -209,7 +236,7 @@ int execute() {
 	//printf("sub_args[0]: [%s]\n",sub_args[0]);
 	if (!strcmp(sub_args[0],"exit")) {//exiting
 	  close(fd[1]);
-       	  return 1;
+       	  return 4;
 	}
 	else if (!strcmp(sub_args[0], "cd")) {//changing directory
 	  close(fd[1]);
@@ -241,7 +268,7 @@ int execute() {
 	//printf ("1");
 	close(fd[1]);//close writing
 	wait(&status);//waits for child to finish
-	if (WEXITSTATUS(status)==1){//exits
+	if (WEXITSTATUS(status)==4){//exits
 	  //printf("parse.c: exit\n");
 	  //printf("exiting\n");
 	  close(fd[0]);
