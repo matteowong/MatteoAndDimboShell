@@ -35,6 +35,7 @@ Bugs we encountered:
 Files/Function Headers:
 
   * parse.c
+  ```c
   	//char * trim_white(char * s)
   	//pre: takes a character pointer
   	//post: returns pointer to first non-white space character and makes all terminating white space into null pointers (trims white  space)
@@ -77,12 +78,13 @@ Files/Function Headers:
   	//pre: none
   	//splits input from buffer on semicolon, then splits again based on white space, then executes - detailed explanation in code
   	//post: returns integer just b/c it has to for the main/for exit
+```
   
   * shell.c
-  
+  ```c
   	//int main()
   	//Runs execute from parse.c
-  
+  ```
 Final Note:
 
   We would like you to be aware that because of several circumstances including not being able to clone this repo from his school computer, being absent for several days, and code being sent through other venues, the work done for this project by Dmytro Hvirtsman, which is a significant fraction of the overall work, is under-represented in the github statistics. This note was approved and encouraged by both Dmytro Hvirtsman and Matteo Wong.
