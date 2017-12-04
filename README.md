@@ -27,7 +27,7 @@ Bugs we encountered:
 
 
 
-  * On Mac our commands file would produce the prompt ad infinitum if there was no newline at the end, this problem does not occur on Linux
+  * On Linux our commands file would produce the prompt ad infinitum if there was no newline at the end, this problem does not occur on Mac
   
   * at the end of a list of commands running the same amount of prompts will be produced (you said that this was fine)
   
