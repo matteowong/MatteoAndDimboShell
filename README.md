@@ -2,24 +2,24 @@
 
 Features that are implemented in our shell:
 
-  *Reads the input a line at a time and parses it
+  * Reads the input a line at a time and parses it
   
-  *Any unneccesary whitespace is removed
+  * Any unneccesary whitespace is removed
   
-  *Executes regular commands
+  * Executes regular commands
   
-  *Executes cd commands
+  * Executes cd commands
   
-  *Executes piped commands
+  * Executes piped commands
   
-  *Executing exit
+  * Executing exit
   
-  *Executes commands with simple redirection
+  * Executes commands with simple redirection
 	
 	
 Features we wished to implement but could not:
 
-  *Complex redirection
+  * Complex redirection
 	
 	
 	
@@ -27,14 +27,14 @@ Bugs we encountered:
 
 
 
-  *On Mac our commands file would produce the prompt ad infinitum if there was no newline at the end, this problem does not occur on Linux
+  * On Mac our commands file would produce the prompt ad infinitum if there was no newline at the end, this problem does not occur on Linux
   
-  *at the end of a list of commands running the same amount of prompts will be produced (you said that this was fine)
+  * at the end of a list of commands running the same amount of prompts will be produced (you said that this was fine)
   
   
 Files/Function Headers:
 
-  *parse.c
+  * parse.c
   	//char * trim_white(char * s)
   	//pre: takes a character pointer
   	//post: returns pointer to first non-white space character and makes all terminating white space into null pointers (trims white  space)
@@ -78,7 +78,7 @@ Files/Function Headers:
   	//splits input from buffer on semicolon, then splits again based on white space, then executes - detailed explanation in code
   	//post: returns integer just b/c it has to for the main/for exit
   
-  *shell.c
+  * shell.c
   
   	//int main()
   	//Runs execute from parse.c
