@@ -5,6 +5,7 @@
 #include <string.h>
 #include <errno.h>
 #include <fcntl.h>
+#include "parse.h"
 
 //char * trim_white(char * s)
 //pre: takes a character pointer
