@@ -1,6 +1,7 @@
 # MatteoAndDimboShell by Matteo Wong and Dmytro Hvirtsman
 
 Features that are implemented in our shell:
+
   Reads the input a line at a time and parses it
   Any unneccesary whitespace is removed
   Executes regular commands
@@ -8,9 +9,13 @@ Features that are implemented in our shell:
   Executes piped commands
   Executing exit
   Executes commands with simple redirection
-Features we wished to implement but could not
+	
+Features we wished to implement but could not:
+
   Complex redirection
+	
 Bugs we encountered:
+
   On Mac our commands file would produce the prompt ad infinitum if there was no newline at the end, this problem does not occur on Linux
   at the end of a list of commands running the same amount of prompts will be produced (you said that this was fine)
 Files/Function Headers:
